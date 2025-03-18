@@ -10,7 +10,14 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Use CORS middleware
-app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
+app.use(
+  cors({
+    origin: "*", // Allow all origins for debugging
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
+
 app.use(bodyParser.json());
 // Add this at the end of your middleware stack
 app.use((err, req, res, next) => {
