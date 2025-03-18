@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const db = require("./db");
 const bcrypt = require("bcryptjs");
+const serverless = require("serverless-http"); 
 require("dotenv").config();
 
 const app = express();
@@ -140,3 +141,4 @@ if (require.main === module) {
     console.log(`Server running on http://localhost:${port}`);
   });
 }
+module.exports.handler = serverless(app);
