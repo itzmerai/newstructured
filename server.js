@@ -121,11 +121,16 @@ app.get("/", (req, res) => {
 app.get("/api/check-email", async (req, res) => {
   const { email } = req.query;
 
+  if (!email) {
+    return res.status(400).json({ error: "Email is required." });
+  }
+
   try {
-    const coordinator = await Coordinator.findOne({
-      where: { coordinator_email: email },
-    });
-    res.json({ exists: !!coordinator });
+    const [results] = await db.query(
+      "SELECT coordinator_email FROM coordinators WHERE coordinator_email = ?",
+      [email]
+    );
+    res.json({ exists: results.length > 0 });
   } catch (error) {
     console.error("Error checking email:", error);
     res.status(500).json({ error: "Failed to check email availability." });
