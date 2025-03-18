@@ -3,13 +3,14 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const db = require("./db");
 const bcrypt = require("bcryptjs");
+const serverless = require("serverless-http"); 
 require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
 // Use CORS middleware
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 app.use(bodyParser.json());
 
 //includes
@@ -130,3 +131,4 @@ app.get("/api/check-email", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+module.exports.handler = serverless(app);
