@@ -11,11 +11,15 @@ const port = process.env.PORT || 5000;
 // Use CORS middleware
 app.use(
   cors({
-    origin: "*", // Allow all origins for debugging
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    origin: process.env.CORS_ORIGIN || "*", // Allow specific origin or all origins
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
   })
 );
+
+app.options("*", cors()); // Handle preflight requests globally
+
 
 app.use(bodyParser.json());
 // Add this at the end of your middleware stack
