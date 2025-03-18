@@ -12,6 +12,11 @@ const port = process.env.PORT || 5000;
 // Use CORS middleware
 app.use(cors({ origin: process.env.CORS_ORIGIN || "http://localhost:5173" }));
 app.use(bodyParser.json());
+// Add this at the end of your middleware stack
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
+});
 
 //includes
 const addadmin = require("./user/addingadmin");
@@ -126,9 +131,9 @@ app.get("/api/check-email", async (req, res) => {
     res.status(500).json({ error: "Failed to check email availability." });
   }
 });
-
-// Start server
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+  });
+}
 module.exports.handler = serverless(app);
