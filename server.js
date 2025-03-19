@@ -48,6 +48,8 @@ const allcoordinator = require("./routes/admin/dashboard/countcoordinator");
 const allstudent = require("./routes/admin/dashboard/totalstudents");
 const recentcoordinator = require("./routes/admin/dashboard/recentcoordinator");
 const allprog = require("./routes/admin/dashboard/countprograms");
+const attendancepercent = require("./routes/admin/dashboard/attendancepercentage");
+const programwise = require("./routes/admin/dashboard/programwise");
 //coordinator
 const addcompany = require("./routes/coordinator/company/addcompany");
 const getcompany = require("./routes/coordinator/company/getcompany");
@@ -65,7 +67,7 @@ const coordinatorcom = require("./routes/coordinator/dashboard/coordinatorcompan
 const coordinatorstudent = require("./routes/coordinator/dashboard/coordinatorstudent");
 const recentlyaddstudent = require("./routes/coordinator/dashboard/recentlyaddedstudent");
 const wcmessage = require("./routes/coordinator/dashboard/welcomecoordinator");
-const cdchart = require("./routes/coordinator/dashboard/cdchart");
+const companydestributionchart = require("./routes/coordinator/dashboard/newcdchart");
 
 // student
 const studentprofile = require("./routes/student/profile/studentdetails");
@@ -96,7 +98,8 @@ app.use("/api/count-coordinators", allcoordinator(db));
 app.use("/countall-students", allstudent(db));
 app.use("/api/recent-coordinators", recentcoordinator(db));
 app.use("/api/count-programs", allprog(db));
-
+app.use("/attendance-percentage", attendancepercent(db));
+app.use("/programwise",programwise(db));
 //Coordinator side API's
 app.use("/api/add-company", addcompany(db));
 app.use("/api/companiesni", getcompany(db));
@@ -113,7 +116,7 @@ app.use("/api/count-students", coordinatorstudent(db));
 app.use("/api/recent-students", recentlyaddstudent(db));
 app.use("/api/reportstudent", studentreport(db));
 app.use("/api/coordinatorwc", wcmessage(db));
-app.use("/api/top-companies", cdchart(db));
+app.use('/api/company-distribution', companydestributionchart(db));
 
 //student side API's
 app.use("/api/student-timesheets", timedtr(db));
