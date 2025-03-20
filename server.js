@@ -62,6 +62,7 @@ const annouce = require("./routes/coordinator/announcements/announcement");
 const annoucement = require("./routes/coordinator/announcements/veiwannoucement");
 const studentreport = require("./routes/coordinator/reports/studentreport");
 const timesheet = require("./routes/coordinator/attendance/timesheet");
+const fileUpload = require("./routes/coordinator/reports/studentfile");
 //coordinator dashboard
 const coordinatorcom = require("./routes/coordinator/dashboard/coordinatorcompany");
 const coordinatorstudent = require("./routes/coordinator/dashboard/coordinatorstudent");
@@ -117,6 +118,7 @@ app.use("/api/recent-students", recentlyaddstudent(db));
 app.use("/api/reportstudent", studentreport(db));
 app.use("/api/coordinatorwc", wcmessage(db));
 app.use('/api/company-distribution', companydestributionchart(db));
+app.use("/",fileUpload(db));
 
 //student side API's
 app.use("/api/student-timesheets", timedtr(db));
