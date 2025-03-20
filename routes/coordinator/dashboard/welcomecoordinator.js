@@ -12,7 +12,7 @@ module.exports = (db) => {
       }
 
       const query = `
-        SELECT coordinator_firstname, coordinator_lastname
+        SELECT coordinator_firstname, coordinator_lastname, coordinator_sex
         FROM coordinator
         WHERE coordinator_id = ?
       `;
@@ -23,9 +23,10 @@ module.exports = (db) => {
         return res.status(404).json({ message: "Coordinator not found" });
       }
 
-      const { coordinator_firstname, coordinator_lastname } = results[0];
+      const { coordinator_firstname, coordinator_lastname, coordinator_sex  } = results[0];
       res.status(200).json({
         fullName: `${coordinator_firstname} ${coordinator_lastname}`,
+        gender: coordinator_sex
       });
     } catch (err) {
       console.error("Error fetching coordinator details:", err);
