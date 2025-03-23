@@ -14,14 +14,16 @@ module.exports = (db) => {
           s.student_address, 
           s.student_contact,
           s.student_sex, 
-          s.student_status, 
+          COALESCE(os.time_status, 'Pending') AS student_status,
           s.student_email, 
           s.student_schoolid,
           c.company_name, 
           c.company_mentor 
         FROM student s
         LEFT JOIN company c ON s.company_id = c.company_id
+        LEFT JOIN ojt_status os ON s.student_id = os.student_id
         WHERE s.coordinator_id = ?
+        GROUP BY s.student_id
       `;
 
       const [results] = await db.query(query, [coordinator_id]);

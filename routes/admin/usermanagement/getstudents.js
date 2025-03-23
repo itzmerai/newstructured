@@ -7,6 +7,7 @@ module.exports = (db) => {
       const query = `
         SELECT 
           s.student_schoolid,
+          s.student_status, 
           CONCAT(cor.coordinator_firstname, ' ', cor.coordinator_lastname) AS coordinator_name,
           p.program_name,
           com.company_name,

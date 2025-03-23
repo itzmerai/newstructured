@@ -5,7 +5,6 @@ module.exports = (db) => {
   router.post("/", async (req, res) => {
     const { studentId, scanTime, address } = req.body;
 
-    // Validate required fields
     if (!address) {
       return res.status(400).json({ error: "Address (location) is required" });
     }
@@ -16,7 +15,6 @@ module.exports = (db) => {
     }
 
     try {
-      // Get student information including company_id and coordinator_id
       const [studentResult] = await db.query(
         "SELECT company_id, coordinator_id FROM student WHERE student_id = ?",
         [studentId]
@@ -27,21 +25,18 @@ module.exports = (db) => {
       }
 
       const { company_id, coordinator_id } = studentResult[0];
-
       if (!company_id) {
         return res.status(400).json({ error: "Student company not assigned" });
       }
 
-      // Process scan time using LOCAL DATE
       const scanDate = new Date(scanTime);
-      const date = scanDate.toISOString().split("T")[0]; // YYYY-MM-DD format
+      const date = scanDate.toISOString().split("T")[0];
       const time = scanDate.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "numeric",
         hour12: true,
       });
 
-      // Timesheet handling
       const [timesheetRows] = await db.query(
         "SELECT * FROM timesheet WHERE student_id = ? AND date = ?",
         [studentId, date]
@@ -76,7 +71,6 @@ module.exports = (db) => {
         );
       }
 
-      // Calculate daily rendered time
       const [updatedTimesheet] = await db.query(
         "SELECT * FROM timesheet WHERE student_id = ? AND date = ?",
         [studentId, date]
@@ -120,7 +114,6 @@ module.exports = (db) => {
           [totalHours, entry.time_id]
         );
 
-        // Get program hours through coordinator
         if (!coordinator_id) {
           return res
             .status(400)
@@ -153,7 +146,6 @@ module.exports = (db) => {
 
         const programHours = programResult[0].program_hours;
 
-        // Calculate total rendered time
         const [renderedResult] = await db.query(
           "SELECT SUM(dailyrenderedtime) AS totalRendered FROM timesheet WHERE student_id = ?",
           [studentId]
@@ -163,7 +155,6 @@ module.exports = (db) => {
         const remainingTime = programHours - totalRendered;
         const timeStatus = remainingTime <= 0 ? "Completed" : "Ongoing";
 
-        // Update OJT status
         const [existingStatus] = await db.query(
           "SELECT * FROM ojt_status WHERE student_id = ?",
           [studentId]
@@ -178,6 +169,14 @@ module.exports = (db) => {
           await db.query(
             "INSERT INTO ojt_status (student_id, rendered_time, remaining_time, time_status) VALUES (?, ?, ?, ?)",
             [studentId, totalRendered, remainingTime, timeStatus]
+          );
+        }
+
+        // Update student status to Inactive if conditions are met
+        if (timeStatus === "Completed" || remainingTime <= 0) {
+          await db.query(
+            "UPDATE student SET student_status = 'Inactive' WHERE student_id = ?",
+            [studentId]
           );
         }
       }
