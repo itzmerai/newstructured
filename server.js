@@ -9,32 +9,57 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Configure allowed origins (split comma-separated values from .env)
-const allowedOrigins = process.env.CORS_ORIGIN 
-  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['']; // Fallback to all origins if not specified
+//===================================================================================
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = process.env.CORS_ORIGIN 
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+      : [];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`CORS blocked for origin: ${origin}`); // For debugging
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+};
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g., mobile apps, Postman)
-      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error(`Origin '${origin}' not allowed by CORS`));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+// Apply CORS middleware
+app.use(cors(corsOptions)); // Enable preflight for all routes
 
-app.options('*', cors()); // Enable preflight for all routes
+// Add this after your CORS middleware but before your routes
+app.options('*', cors(corsOptions)); // Handle preflight for all routes
 
+// Add this middleware to ensure headers are set properly
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Set headers for allowed origins
+  if (origin && corsOptions.origin(origin, () => {})) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Expose-Headers', 'Authorization');
+  }
+  
+  next();
+});
+//============================================================================
 
 app.use(bodyParser.json());
 // Add this at the end of your middleware stack
+// Update your error handling middleware to handle CORS errors
 app.use((err, req, res, next) => {
+  if (err.message.includes('CORS')) {
+    return res.status(403).json({ error: err.message });
+  }
+  
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
