@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 // Configure allowed origins (split comma-separated values from .env)
 const allowedOrigins = process.env.CORS_ORIGIN 
   ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
-  : ['*']; // Fallback to all origins if not specified
+  : ['']; // Fallback to all origins if not specified
 
 app.use(
   cors({
