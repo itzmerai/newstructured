@@ -8,17 +8,28 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Use CORS middleware
+// Configure allowed origins (split comma-separated values from .env)
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['*']; // Fallback to all origins if not specified
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*", // Allow specific origin or all origins
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Include OPTIONS
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., mobile apps, Postman)
+      if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin '${origin}' not allowed by CORS`));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
-app.options("*", cors()); // Handle preflight requests globally
+app.options('*', cors()); // Enable preflight for all routes
 
 
 app.use(bodyParser.json());
